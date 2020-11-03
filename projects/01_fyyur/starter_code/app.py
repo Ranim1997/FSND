@@ -8,11 +8,13 @@ import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import load_only
 import logging
 from logging import Formatter, FileHandler
-from flask_wtf import Form
+from flask_wtf import Form, FlaskForm
 from forms import *
 from flask_migrate import Migrate
+from sqlalchemy.exc import SQLAlchemyError
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -47,7 +49,7 @@ class Venue(db.Model):
 class Artist(db.Model):
     __tablename__ = 'Artist'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String)
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
@@ -246,32 +248,31 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
   # TODO: replace with real data returned from querying the database
-  data=[{
-    "id": 4,
-    "name": "Guns N Petals",
-  }, {
-    "id": 5,
-    "name": "Matt Quevedo",
-  }, {
-    "id": 6,
-    "name": "The Wild Sax Band",
-  }]
-  return render_template('pages/artists.html', artists=data)
+  artist_id_name = ["id", "name"]
+  artists_info = db.session.query(Artist).options(load_only(*artist_id_name)).all()
+  return render_template('pages/artists.html', artists=artists_info)
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band".
-  response={
-    "count": 1,
-    "data": [{
-      "id": 4,
-      "name": "Guns N Petals",
-      "num_upcoming_shows": 0,
-    }]
-  }
-  return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
+  search= request.form.get("search_term", "")
+  search_result = {"count": 0, "data": []}
+  artist_id_name = ["id", "name"]
+
+  artist_search = (db.session.query(Artist).filter(Artist.name.ilike(f"%{search}%")).options(load_only(*artist_id_name)).all())
+  search_result["count"] = len(artist_search)
+
+  for result in artist_search:
+    artist_info = {
+      "id": result.id,
+      "name": result.name,
+      }
+    search_result["data"].append(artist_info)
+
+
+  return render_template('pages/search_artists.html', results=search_result, search_term=request.form.get('search_term', ''))
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
@@ -416,14 +417,40 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   # called upon submitting the new artist listing form
-  # TODO: insert form data as a new Venue record in the db, instead
+  # TODO: insert form data as a new artist record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-
-  # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
+  error = False
+  atrist={}
+  try:
+    #get data from request.form
+    name = request.form['name']
+    city = request.form['city']
+    state = request.form['state']
+    phone = request.form['phone']
+    genres = request.form['genres']
+    image_link = request.form['image_link']
+    facebook_link = request.form['facebook_link']
+    print(name,city,state,phone,genres,image_link,facebook_link)
+    #crete object of an artisi model
+    atrist = Artist(name=name,city=city,state=state,phone=phone,genres=genres,image_link=image_link,facebook_link=facebook_link)
+    db.session.add(atrist)
+    db.session.commit()
+  except:
+    error = True
+    db.session.rollback()
+  finally:
+    if error:
+      print(name,city,state,phone,genres,image_link,facebook_link)
+      # abort (400)
+      flash('An error occurred. Artist ' + atrist.name + ' could not be listed.')
+    else:
+    # on successful db insert, flash success
+      flash('Artist ' + atrist.name + ' was successfully listed!')
+    db.session.close()
   # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
   return render_template('pages/home.html')
+
+
 
 
 #  Shows
