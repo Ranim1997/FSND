@@ -101,7 +101,7 @@ class VenueForm(Form):
     )
     state = SelectField(
         'state', validators=[DataRequired(), AnyOf(states_list)],
-        choices=[(c, c) for c in states_list]
+        choices=[(c) for c in states_list]
     )
     address = StringField(
         'address', validators=[DataRequired()]
@@ -115,7 +115,7 @@ class VenueForm(Form):
     genres = SelectMultipleField(
         # TODO implement enum restriction
         'genres', validators=[DataRequired(), AnyOf(genres_list)],
-        choices=[(c, c) for c in genres_list]
+        choices=[(c) for c in genres_list]
     )
     facebook_link = StringField(
         'facebook_link', validators=[URL(),Length(-1,120),Optional()]
@@ -206,7 +206,7 @@ class ArtistForm(Form):
         )
         state = SelectField(
             'state', validators=[DataRequired(), AnyOf(states_list)],
-            choices=[(c, c) for c in states_list]
+            choices=[(c) for c in states_list]
         )
         phone = StringField(
             # TODO implement validation logic for state
@@ -218,7 +218,7 @@ class ArtistForm(Form):
         genres = SelectMultipleField(
             # TODO implement enum restriction
             'genres', validators=[DataRequired(), AnyOf(genres_list)],
-            choices=[(c, c) for c in genres_list]
+            choices=[(c) for c in genres_list]
         )
         facebook_link = StringField(
             # TODO implement enum restriction
