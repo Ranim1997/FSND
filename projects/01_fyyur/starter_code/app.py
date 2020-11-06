@@ -174,15 +174,12 @@ def show_venue(venue_id):
                   "phone":query[0].Venue.phone ,
                   "facebook_link": query[0].Venue.facebook_link ,
                   "image_link":query[0].Venue.image_link ,
-                  "upcoming_shows_count" : 0 ,
-                  "past_shows_count" : 0   
                   }
-        past_shows_count = 0  
-        upcoming_shows_count = 0   
+
         upcoming_shows = []
         past_shows = []
         for d in query:
-            if datetime.today() > query[0].Show.start_time:
+            if datetime.today() > d.Show.start_time:
                     show = {
                                 "artist_id": d.artist_id ,
                                 "artist_name": d.artist_name ,
@@ -190,8 +187,8 @@ def show_venue(venue_id):
                                 "start_time": str(d.Show.start_time)
                                 }
                     past_shows.append(show)             
-                    past_shows_count = past_shows_count+1        
-            elif  datetime.today() < query[0].Show.start_time:
+                        
+            elif  datetime.today() <= d.Show.start_time:
                     show = {
                                 "artist_id": d.artist_id ,
                                 "artist_name": d.artist_name ,
@@ -199,13 +196,11 @@ def show_venue(venue_id):
                                 "start_time": str(d.Show.start_time)
                                 }
                     upcoming_shows.append(show) 
-                    upcoming_shows_count = upcoming_shows_count+1
-        profile_data["past_shows_count"] = past_shows_count
-        profile_data["upcoming_shows_count"] = upcoming_shows_count                  
+                    
+        profile_data["past_shows_count"] = len(past_shows)
+        profile_data["upcoming_shows_count"] = len(upcoming_shows)                
         profile_data["past_shows"] = past_shows
         profile_data["upcoming_shows"] = upcoming_shows
- 
-        
         return render_template('pages/show_venue.html', venue=profile_data)
   else:
      query = db.session.query(Venue).filter(Venue.id == venue_id).all()
@@ -326,16 +321,13 @@ def show_artist(artist_id):
                   "state": query[0].Artist.state ,
                   "phone": query[0].Artist.phone ,
                   "facebook_link": query[0].Artist.facebook_link ,
-                  "image_link": query[0].Artist.image_link ,
-                  "upcoming_shows_count" : 0 ,
-                  "past_shows_count" : 0   
+                  "image_link": query[0].Artist.image_link , 
                   }
-        past_shows_count = 0  
-        upcoming_shows_count = 0   
+  
         upcoming_shows = []
         past_shows = []
         for d in query:
-            if datetime.today() > query[0].Show.start_time:
+            if datetime.today() > d.Show.start_time:
                     show = {
                                 "venue_id": d.venue_id ,
                                 "venue_name": d.venue_name ,
@@ -343,8 +335,8 @@ def show_artist(artist_id):
                                 "start_time": str(d.Show.start_time)
                                 }
                     past_shows.append(show)             
-                    past_shows_count = past_shows_count+1        
-            elif  datetime.today() <= query[0].Show.start_time:
+        
+            elif  datetime.today() <= d.Show.start_time:
                     show = {
                                 "venue_id": d.venue_id ,
                                 "venue_name": d.venue_name ,
@@ -352,9 +344,9 @@ def show_artist(artist_id):
                                 "start_time": str(d.Show.start_time)
                                 }
                     upcoming_shows.append(show) 
-                    upcoming_shows_count = upcoming_shows_count+1
-        profile_data["past_shows_count"] = past_shows_count
-        profile_data["upcoming_shows_count"] = upcoming_shows_count                  
+
+        profile_data["past_shows_count"] = len(past_shows)
+        profile_data["upcoming_shows_count"] = len(upcoming_shows)                  
         profile_data["past_shows"] = past_shows
         profile_data["upcoming_shows"] = upcoming_shows  
         return render_template('pages/show_artist.html', artist=profile_data)
