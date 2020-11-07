@@ -3,9 +3,16 @@
 {% block content %}
 <div class="row">
 	<div class="col-sm-6">
+
+
 		<h1 class="monospace">
 			{{ venue.name }}
 		</h1>
+
+		<button class="btn btn-md" style="float: right;">
+		<a href="/venues/{{venue.id}}/delete" style="float: right;" >Delete &cross;</a>
+		</button>
+
 		<p class="subtitle">
 			ID: {{ venue.id }}
 		</p>

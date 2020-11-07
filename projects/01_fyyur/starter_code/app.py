@@ -5,7 +5,13 @@
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import (Flask, 
+                  render_template,
+                  request,
+                  Response, 
+                  flash, 
+                  redirect, 
+                  url_for)
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import load_only
@@ -16,6 +22,9 @@ from forms import *
 from flask_migrate import Migrate
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import distinct
+import datetime
+from models import app, db, Venue, Artist, Show
+
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -32,44 +41,6 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-
-class Venue(db.Model):
-    __tablename__ = 'Venue'
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-class Artist(db.Model):
-    __tablename__ = 'Artist'
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
-class Show(db.Model):
-  __tablename__ = 'Show'
-  id = db.Column(db.Integer, primary_key=True , autoincrement=True)
-  artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-  venue_id  = db.Column(db.Integer, db.ForeignKey('Venue.id'),  nullable=False)
-  start_time = db.Column(db.DateTime, nullable=False ,default= datetime.today())
 
 
 #----------------------------------------------------------------------------#
@@ -179,7 +150,7 @@ def show_venue(venue_id):
         upcoming_shows = []
         past_shows = []
         for d in query:
-            if datetime.today() > d.Show.start_time:
+            if datetime.datetime.today() > d.Show.start_time:
                     show = {
                                 "artist_id": d.artist_id ,
                                 "artist_name": d.artist_name ,
@@ -188,7 +159,7 @@ def show_venue(venue_id):
                                 }
                     past_shows.append(show)             
                         
-            elif  datetime.today() <= d.Show.start_time:
+            elif  datetime.datetime.today() <= d.Show.start_time:
                     show = {
                                 "artist_id": d.artist_id ,
                                 "artist_name": d.artist_name ,
@@ -265,14 +236,21 @@ def create_venue_submission():
   return render_template('pages/home.html')
 
 
-@app.route('/venues/<venue_id>', methods=['DELETE'])
+@app.route("/venues/<venue_id>/delete")
 def delete_venue(venue_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using
-  # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+    name = Venue.query.get(venue_id).name
+    try:
+        venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
+        db.session.delete(venue)
+        db.session.commit()
+        flash("Venue " + name + " was deleted successfully")
+    except:
+        db.session.rollback()
+        flash('An error occured. Venue could not be deleted.')
+    finally:
+        db.session.close()
+        return redirect(url_for("index"))
 
-  # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-  # clicking that button delete it from the db then redirect the user to the homepage
-  return None
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -327,7 +305,7 @@ def show_artist(artist_id):
         upcoming_shows = []
         past_shows = []
         for d in query:
-            if datetime.today() > d.Show.start_time:
+            if datetime.datetime.today() > d.Show.start_time:
                     show = {
                                 "venue_id": d.venue_id ,
                                 "venue_name": d.venue_name ,
@@ -336,7 +314,7 @@ def show_artist(artist_id):
                                 }
                     past_shows.append(show)             
         
-            elif  datetime.today() <= d.Show.start_time:
+            elif  datetime.datetime.today() <= d.Show.start_time:
                     show = {
                                 "venue_id": d.venue_id ,
                                 "venue_name": d.venue_name ,
