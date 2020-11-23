@@ -108,6 +108,7 @@ class QuestionView extends Component {
           url: `/questions/${id}`, //TODO: update request URL
           type: "DELETE",
           success: (result) => {
+            alert(result.message)
             this.getQuestions();
           },
           error: (error) => {

@@ -35,7 +35,7 @@ class QuizView extends Component {
     })
   }
 
-  selectCategory = ({type, id=0}) => {
+  selectCategory = ({type, id=-1}) => {
     this.setState({quizCategory: {type, id}}, this.getNextQuestion)
   }
 
@@ -56,9 +56,6 @@ class QuizView extends Component {
         previous_questions: previousQuestions,
         quiz_category: this.state.quizCategory
       }),
-      xhrFields: {
-        withCredentials: true
-      },
       crossDomain: true,
       success: (result) => {
         this.setState({
@@ -131,13 +128,22 @@ class QuizView extends Component {
   }
 
   evaluateAnswer = () => {
-    const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
-    const answerArray = this.state.currentQuestion.answer.toLowerCase().split(' ');
-    return answerArray.includes(formatGuess)
+    const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase().split(' ')
+    const answerArray = this.state.currentQuestion.answer.toLowerCase().split(' ')
+
+    let correctGuess = false;
+
+    // This was modified to enable to evaluation of guesses containing multiple words
+    for (const word of formatGuess) {
+      if (answerArray.includes(word)) {
+        correctGuess = true;
+        break;
+      }
+    }
+    return correctGuess;
   }
 
   renderCorrectAnswer(){
-    const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
     let evaluate =  this.evaluateAnswer()
     return(
       <div className="quiz-play-holder">
@@ -165,7 +171,6 @@ class QuizView extends Component {
         )
   }
 
-
   render() {
     return this.state.quizCategory
         ? this.renderPlay()
@@ -174,3 +179,4 @@ class QuizView extends Component {
 }
 
 export default QuizView;
+
