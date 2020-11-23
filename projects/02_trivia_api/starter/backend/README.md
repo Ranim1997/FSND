@@ -55,6 +55,10 @@ Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` d
 ## API Documentation
 
 ```bash
+
+At present this app can be run locally and not hosted. URL: http://localhost:5000/ 
+The application does not require any type of authentication.
+
 Endpoints
 GET '/categories'
 GET '/questions'
