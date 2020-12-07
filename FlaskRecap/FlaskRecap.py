@@ -12,6 +12,15 @@ greetings = {
             'ja': 'こんにちは'
             }
 
+@app.route('/headers')
+def headers():
+    # @TODO unpack the request header
+    auth_header = request.headers['Authorization']
+    header_parts = auth_header.split(' ')[1]
+    print(header_parts)
+    return 'not implemented'
+
+
 @app.route('/greeting', methods=['GET'])
 def greeting_all():
     return jsonify({'greetings': greetings})
@@ -31,3 +40,6 @@ def greeting_add():
         abort(422)
     greetings[info['lang']] = info['greeting']
     return jsonify({'greetings':greetings})
+
+if __name__ == "__main__":
+    app.run()
