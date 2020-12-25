@@ -31,7 +31,7 @@ def create_app(test_config=None):
             actors = Actors.query.all()
             if actors:
                 return jsonify({'success': True,
-                                'Actors': [{'id': actor.id
+                                'Actors': [{'id': actor.id,
                                             'age': actor.age,
                                             'name': actor.name}
                                            for actor in actors]}), 200
