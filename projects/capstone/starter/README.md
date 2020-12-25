@@ -21,7 +21,9 @@ This app uses Auth0 as Authentication provider. JWTs for different role can be a
     - User: `executive_producer@test.com`
     - Password: `Test@1234`
 
-Test the endpoints with the following link: [https://fsndcastingagencyapp.herokuapp.com](https://fsndcastingagencyapp.herokuapp.com)
+Test the endpoints below with the following link: [https://fsndcastingagencyapp.herokuapp.com](https://fsndcastingagencyapp.herokuapp.com)
+
+For example: https://fsndcastingagencyapp.herokuapp.com/actors
 
 ## API Endpoints
 This application contains the following endpoints:
